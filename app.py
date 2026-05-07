@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import time
 from collections import deque
 from streamlit_autorefresh import st_autorefresh
+from csv_monitor import check_csv_for_threats
 
 # ------------------------------------------------
 # PAGE CONFIG
@@ -359,11 +360,11 @@ with col_devices:
 
     st.dataframe(device_table, use_container_width=True, hide_index=True)
 
-# ── Initialize alert log ──────────────────────────
+# Initialize alert log 
 if "alert_log" not in st.session_state:
     st.session_state.alert_log = []
 
-# ── Append only NEW alerts since last read ────────
+# Append only NEW alerts since last read 
 new_alerts = df.iloc[st.session_state.last_row_read - len(df):]  
 new_malware = new_alerts[new_alerts["prediction"] == "malware"]
 
@@ -398,3 +399,10 @@ with col_alerts:
                     f"**{alert['timestamp']}** — `{alert['device']}` detected "
                     f"**{alert['attack_type']}** (confidence: {alert['confidence']})"
                 )
+
+# Email alert monitor
+pending = len(st.session_state.get("threat_batch", []))
+if pending > 0:
+    st.warning(f" {pending} threats queued — email sends in next batch window.")
+
+check_csv_for_threats(df)
