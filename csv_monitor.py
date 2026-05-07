@@ -44,7 +44,7 @@ def check_csv_for_threats(df):
 
     # ── Escalation Rule 1: Too many threats at once ───────────
     if len(batch) >= VOLUME_THRESHOLD:
-        #send_summary_email(batch, urgent=True, reason="High volume of threats detected")
+        send_summary_email(batch, urgent=True, reason="High volume of threats detected")
         st.session_state.threat_batch  = []
         st.session_state.last_sms_time = datetime.now()
         return
