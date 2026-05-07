@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime, timedelta
 from collections import Counter
-from email_alert import classify_severity, send_summary_email
+from alert import classify_severity, send_summary_email
 
 CONFIDENCE_THRESHOLD = 0.75
 WINDOW_MINUTES       = 5
