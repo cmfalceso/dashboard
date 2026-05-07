@@ -1,6 +1,6 @@
 import smtplib
 from email.message import EmailMessage
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from collections import Counter
 import streamlit as st
 
@@ -38,7 +38,8 @@ def send_summary_email(batch: list, urgent: bool = False, reason: str = ""):
     top_household = Counter(t["household"] for t in batch).most_common(1)[0][0]
     avg_cpu       = sum(t["cpu"] for t in batch) / total
     avg_ram       = sum(t["ram"] for t in batch) / total
-    timestamp     = datetime.now().strftime("%H:%M %b %d")
+    PH_TZ     = timezone(timedelta(hours=8))
+    timestamp = datetime.now(PH_TZ).strftime("%H:%M %b %d")
     header        = "URGENT THREAT ALERT" if urgent else "THREAT SUMMARY"
     device_lines  = "\n".join(f"  • {d} ({c}x)" for d, c in top_devices)
 
