@@ -40,23 +40,23 @@ def send_summary_email(batch: list, urgent: bool = False, reason: str = ""):
     avg_ram       = sum(t["ram"] for t in batch) / total
     timestamp     = datetime.now().strftime("%H:%M %b %d")
     header        = "URGENT THREAT ALERT" if urgent else "THREAT SUMMARY"
-    device_lines  = "\n".join(f"  - {d} ({c}x)" for d, c in top_devices)
+    device_lines  = "\n".join(f"  • {d} ({c}x)" for d, c in top_devices)
 
     body = f"""
 {header} — {timestamp}
-Reason    : {reason}
-Household : {top_household}
+Reason: {reason}
+Household: {top_household}
 ──────────────────
-Total     : {total} threats
-Critical  : {severities.get('critical', 0)}
-High      : {severities.get('high', 0)}
-Medium    : {severities.get('medium', 0)}
+Total: {total} threats
+Critical: {severities.get('critical', 0)}
+High: {severities.get('high', 0)}
+Medium: {severities.get('medium', 0)}
 ──────────────────
 Top devices:
 {device_lines}
 ──────────────────
-Avg CPU   : {avg_cpu:.1f}%
-Avg RAM   : {avg_ram:.1f}%
+Avg CPU: {avg_cpu:.1f}%
+Avg RAM: {avg_ram:.1f}%
 ──────────────────
 Check your dashboard immediately.
     """
