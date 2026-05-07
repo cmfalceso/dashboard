@@ -24,7 +24,10 @@ def check_csv_for_threats(df):
             continue
 
         prediction = str(row["prediction"]).strip().lower()
-        confidence = float(row["confidence"])
+        try:
+            confidence = float(str(row["confidence"]).strip())
+        except (ValueError, TypeError):
+            continue
 
         if prediction not in ("normal", "benign") and confidence >= CONFIDENCE_THRESHOLD:
             st.session_state.threat_batch.append({
