@@ -76,3 +76,4 @@ Top devices:
         print(f"[EMAIL SENT] {reason} — {total} threats")
     except Exception as e:
         print(f"[EMAIL FAILED] {e}")
+        st.error(f"Email failed: {e}")
