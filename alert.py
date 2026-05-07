@@ -49,9 +49,10 @@ Reason: {reason}
 Household: {top_household}
 ──────────────────
 Total: {total} threats
-Critical: {severities.get('critical', 0)}
-High: {severities.get('high', 0)}
-Medium: {severities.get('medium', 0)}
+Critical: {severities.get('Critical', 0)}
+High: {severities.get('High', 0)}
+Medium: {severities.get('Medium', 0)}
+Low: {severities.get('Low', 0)}
 ──────────────────
 Top devices:
 {device_lines}
