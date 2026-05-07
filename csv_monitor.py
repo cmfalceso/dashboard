@@ -29,16 +29,25 @@ def check_csv_for_threats(df):
         except (ValueError, TypeError):
             continue
 
-        if prediction not in ("normal", "benign") and confidence >= CONFIDENCE_THRESHOLD:
-            st.session_state.threat_batch.append({
-                "device"    : row["device"],
-                "household" : row["household"],
-                "confidence": confidence,
-                "severity"  : classify_severity(confidence),
-                "cpu"       : float(row["cpu_usage"]),
-                "ram"       : float(row["ram_usage"]),
-            })
-            st.session_state.alerted_indices.add(index)
+    if prediction not in ("normal", "benign") and confidence >= CONFIDENCE_THRESHOLD:
+        try:
+            cpu = float(row["cpu_usage"])
+        except (ValueError, TypeError):
+            cpu = None
+        try:
+            ram = float(row["ram_usage"])
+        except (ValueError, TypeError):
+            ram = None
+    
+        st.session_state.threat_batch.append({
+            "device"    : row["device"],
+            "household" : row["household"],
+            "confidence": confidence,
+            "severity"  : classify_severity(confidence),
+            "cpu"       : cpu,
+            "ram"       : ram,
+        })
+        st.session_state.alerted_indices.add(index)
 
     batch = st.session_state.threat_batch
 
