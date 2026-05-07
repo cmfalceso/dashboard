@@ -36,8 +36,15 @@ def send_summary_email(batch: list, urgent: bool = False, reason: str = ""):
     device_counts = Counter(t["device"] for t in batch)
     top_devices   = device_counts.most_common(3)
     top_household = Counter(t["household"] for t in batch).most_common(1)[0][0]
-    avg_cpu       = sum(t["cpu"] for t in batch) / total
-    avg_ram       = sum(t["ram"] for t in batch) / total
+    cpu_values = [t["cpu"] for t in batch if t["cpu"] is not None]
+    ram_values = [t["ram"] for t in batch if t["ram"] is not None]
+    avg_cpu    = sum(cpu_values) / len(cpu_values) if cpu_values else None
+    avg_ram    = sum(ram_values) / len(ram_values) if ram_values else None
+    resource_line = (
+        f"Avg CPU: {avg_cpu:.1f}%\nAvg RAM: {avg_ram:.1f}%\n──────────────────\n"
+        if avg_cpu is not None and avg_ram is not None
+        else ""
+    )
     PH_TZ     = timezone(timedelta(hours=8))
     timestamp = datetime.now(PH_TZ).strftime("%H:%M %b %d")
     header        = "URGENT THREAT ALERT" if urgent else "THREAT SUMMARY"
@@ -57,10 +64,7 @@ Low: {severities.get('Low', 0)}
 Top devices:
 {device_lines}
 ──────────────────
-Avg CPU: {avg_cpu:.1f}%
-Avg RAM: {avg_ram:.1f}%
-──────────────────
-Check your dashboard immediately.
+{resource_line} Check your dashboard immediately.
     """
 
     try:
