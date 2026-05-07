@@ -1001,3 +1001,8 @@ timestamp,household,device,attack_type,prediction,confidence,cpu_usage,ram_usage
 01:32:19,Monitor,VM4,Normal,benign,0.88,37.2,46.4
 01:32:36,Household_1,LightBulb,Normal,benign,0.96,,
 01:32:34,Household_3,WeatherSensor,Scanning,malware,0.92,,
+01:32:31,Household_3,Router,DoS,malware,0.96,,
+01:32:32,Household_5,Router_2,Mirai,malware,0.9,,
+01:32:38,Household_5,DoorLock_2,Ransomware,malware,0.98,,
+01:32:22,Household_4,Camera_4,Scanning,malware,0.92,,
+01:32:23,Household_4,LightBulb_2,Mirai,malware,0.86,,
