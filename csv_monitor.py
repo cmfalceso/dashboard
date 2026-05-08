@@ -10,17 +10,18 @@ DEVICE_THRESHOLD     = 5
 
 def check_csv_for_threats(df):
 
-    if "alerted_indices" not in st.session_state:
-        st.session_state.alerted_indices = set()
     if "threat_batch"    not in st.session_state:
         st.session_state.threat_batch = []
     if "last_sms_time"   not in st.session_state:
         st.session_state.last_sms_time = datetime.now()
+    if "last_processed_len" not in st.session_state:
+        st.session_state.last_processed_len = len(df)  # skip existing rows on first load
+        return  # ← don't process anything on first load
 
-    for index, row in df.iterrows():
-        if index in st.session_state.alerted_indices:
-            continue
+    # ── Only look at NEW rows since last run ─────────────────
+    new_rows = df.iloc[st.session_state.last_processed_len:]
 
+    for index, row in new_rows.iterrows():
         prediction = str(row["prediction"]).strip().lower()
         try:
             confidence = float(str(row["confidence"]).strip())
@@ -45,12 +46,13 @@ def check_csv_for_threats(df):
                 "cpu"       : cpu,
                 "ram"       : ram,
             })
-            st.session_state.alerted_indices.add(index)
+
+    # ── Update pointer ────────────────────────────────────────
+    st.session_state.last_processed_len = len(df)
 
     batch = st.session_state.threat_batch
 
     if len(batch) >= VOLUME_THRESHOLD:
-        st.write("DEBUG: Triggering urgent email — volume spike")
         send_summary_email(batch, urgent=True, reason="High volume of threats detected")
         st.session_state.threat_batch  = []
         st.session_state.last_sms_time = datetime.now()
@@ -59,7 +61,6 @@ def check_csv_for_threats(df):
     device_counts = Counter(t["device"] for t in batch)
     for device, count in device_counts.items():
         if count >= DEVICE_THRESHOLD:
-            st.write(f"DEBUG: Triggering urgent email — {device} repeatedly flagged")
             send_summary_email(batch, urgent=True, reason=f"{device} repeatedly flagged")
             st.session_state.threat_batch  = []
             st.session_state.last_sms_time = datetime.now()
@@ -70,11 +71,6 @@ def check_csv_for_threats(df):
     ) >= timedelta(minutes=WINDOW_MINUTES)
 
     if window_elapsed and len(batch) > 0:
-        st.write("DEBUG: Triggering scheduled email")
         send_summary_email(batch, urgent=False, reason="Scheduled summary")
         st.session_state.threat_batch  = []
         st.session_state.last_sms_time = datetime.now()
-    elif window_elapsed and len(batch) == 0:
-        st.write("DEBUG: Window elapsed but batch is empty — no email sent")
-    elif not window_elapsed:
-        st.write("DEBUG: Window not elapsed yet — waiting")
