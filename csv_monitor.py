@@ -1,4 +1,5 @@
 import streamlit as st
+import math
 from datetime import datetime, timedelta
 from collections import Counter
 from alert import classify_severity, send_summary_email
@@ -31,10 +32,15 @@ def check_csv_for_threats(df):
         if prediction not in ("normal", "benign") and confidence >= CONFIDENCE_THRESHOLD:
             try:
                 cpu = float(row["cpu_usage"])
+                if math.isnan(cpu):
+                    cpu = None
             except (ValueError, TypeError):
                 cpu = None
+            
             try:
                 ram = float(row["ram_usage"])
+                if math.isnan(ram):
+                    ram = None
             except (ValueError, TypeError):
                 ram = None
 
