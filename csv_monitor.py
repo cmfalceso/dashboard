@@ -11,16 +11,17 @@ DEVICE_THRESHOLD     = 5
 
 def check_csv_for_threats(df):
 
-    if "threat_batch"    not in st.session_state:
+    if "threat_batch"        not in st.session_state:
         st.session_state.threat_batch = []
-    if "last_sms_time"   not in st.session_state:
+    if "last_sms_time"       not in st.session_state:
         st.session_state.last_sms_time = datetime.now()
-    if "last_processed_len" not in st.session_state:
-        st.session_state.last_processed_len = len(df)  # skip existing rows on first load
+    if "last_processed_len"  not in st.session_state:
+        st.session_state.last_processed_len = 0
+    if "startup_done"        not in st.session_state:
+        st.session_state.startup_done = False
 
-    # ── Only look at NEW rows since last run ─────────────────
+    # ── Process only new rows ─────────────────────────────────
     new_rows = df.iloc[st.session_state.last_processed_len:]
-    st.write(f"DEBUG: {len(new_rows)} new rows found")
 
     for index, row in new_rows.iterrows():
         prediction = str(row["prediction"]).strip().lower()
@@ -32,15 +33,13 @@ def check_csv_for_threats(df):
         if prediction not in ("normal", "benign") and confidence >= CONFIDENCE_THRESHOLD:
             try:
                 cpu = float(row["cpu_usage"])
-                if math.isnan(cpu):
-                    cpu = None
+                import math
+                if math.isnan(cpu): cpu = None
             except (ValueError, TypeError):
                 cpu = None
-            
             try:
                 ram = float(row["ram_usage"])
-                if math.isnan(ram):
-                    ram = None
+                if math.isnan(ram): ram = None
             except (ValueError, TypeError):
                 ram = None
 
@@ -58,6 +57,16 @@ def check_csv_for_threats(df):
 
     batch = st.session_state.threat_batch
 
+    # ── On startup: send ONE summary of existing threats ──────
+    if not st.session_state.startup_done:
+        st.session_state.startup_done = True
+        if len(batch) > 0:
+            send_summary_email(batch, urgent=False, reason="System startup — current threat status")
+            st.session_state.threat_batch  = []
+            st.session_state.last_sms_time = datetime.now()
+        return
+
+    # ── After startup: normal escalation rules ────────────────
     if len(batch) >= VOLUME_THRESHOLD:
         send_summary_email(batch, urgent=True, reason="High volume of threats detected")
         st.session_state.threat_batch  = []
