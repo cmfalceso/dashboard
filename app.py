@@ -62,19 +62,13 @@ div[data-testid="stMetric"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------------------------------------
 # TITLE
-# ------------------------------------------------
 st.title("IoT Malware Detection Security Dashboard")
 
-# ------------------------------------------------
 # AUTO REFRESH
-# ------------------------------------------------
-st_autorefresh(interval=3000)
+#st_autorefresh(interval=3000)
 
-# ------------------------------------------------
 # LOAD DATA
-# ------------------------------------------------
 df = pd.read_csv(
     "detections.csv",
     names=["timestamp", "household", "device", "attack_type", "prediction", "confidence", "cpu_usage", "ram_usage"],
@@ -91,9 +85,7 @@ MAX_POINTS = 50
 if "timeline_data" not in st.session_state:
     st.session_state.timeline_data = deque(maxlen=MAX_POINTS)
 
-# ------------------------------------------------
 # TRAFFIC CLASSIFICATION
-# ------------------------------------------------
 benign_count = (df["prediction"] == "benign").sum()
 malware_count = (df["prediction"] == "malware").sum()
 total = len(df)
@@ -134,9 +126,7 @@ security_fig.update_layout(
     )]
 )
 
-# ------------------------------------------------
 # TOP METRICS
-# ------------------------------------------------
 col1, col2, col3, col4 = st.columns(4)
 
 col1.metric("Traffic Analyzed", total)
@@ -146,14 +136,12 @@ col4.metric("Avg Confidence", round(df["confidence"].mean(), 2))
 
 st.divider()
 
-# ------------------------------------------------
 # NETWORK OVERVIEW (MAIN SECTION)
-# ------------------------------------------------
 #t.subheader("Network Overview")
 
 left_col, right_col = st.columns([2, 3])
 
-# -------- LEFT: DONUT + METRICS --------
+# LEFT: DONUT + METRICS 
 with left_col:
 
     st.markdown("### Traffic Classification")
@@ -178,7 +166,7 @@ with left_col:
         </div>
         """, unsafe_allow_html=True)
 
-# -------- RIGHT: HOUSEHOLDS --------
+# RIGHT: HOUSEHOLDS 
 with right_col:
 
     st.markdown("### Infection Status")
@@ -221,9 +209,7 @@ with right_col:
 
 st.divider()
 
-# ------------------------------------------------
 # TASK MANAGER STYLE DETECTION TIMELINE
-# ------------------------------------------------
 st.subheader("Detection Timeline")
 
 MAX_POINTS = 50  # how many time steps to show (scrolling window)
@@ -405,7 +391,7 @@ pending = len(st.session_state.get("threat_batch", []))
 if pending > 0:
     st.warning(f" {pending} threats queued — email sends in next batch window.")
 
-# ── TEMPORARY TEST BUTTON ─────────────────────────────────────
+#TEMPORARY TEST BUTTON
 if st.button("Send Test Email"):
     from alert import email_alert
     try:
@@ -417,6 +403,5 @@ if st.button("Send Test Email"):
         st.success("Test email sent!")
     except Exception as e:
         st.error(f"Email failed: {e}")
-# ─────────────────────────────────────────────────────────────
 
 check_csv_for_threats(df)
