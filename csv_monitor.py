@@ -17,7 +17,6 @@ def check_csv_for_threats(df):
         st.session_state.last_sms_time = datetime.now()
     if "last_processed_len" not in st.session_state:
         st.session_state.last_processed_len = len(df)  # skip existing rows on first load
-        return  # ← don't process anything on first load
 
     # ── Only look at NEW rows since last run ─────────────────
     new_rows = df.iloc[st.session_state.last_processed_len:]
