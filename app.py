@@ -70,7 +70,7 @@ st.title("IoT Malware Detection Security Dashboard")
 # ------------------------------------------------
 # AUTO REFRESH
 # ------------------------------------------------
-st_autorefresh(interval=1000)
+st_autorefresh(interval=3000)
 
 # ------------------------------------------------
 # LOAD DATA
