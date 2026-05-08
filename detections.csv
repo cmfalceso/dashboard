@@ -1011,3 +1011,8 @@ timestamp,household,device,attack_type,prediction,confidence,cpu_usage,ram_usage
 01:31:49,Household_2,DoorLock,Ransomware,malware,0.96,,
 01:31:50,Household_5,DoorLock_2,Normal,benign,0.9,,
 01:31:51,Household_5,SmartTV_2,DoS,malware,0.99,,
+01:31:47,Household_5,Router_2,Scanning,malware,0.9,,
+01:31:48,Household_2,DoorLock,Mirai,malware,0.92,,
+01:31:49,Household_2,DoorLock,Ransomware,malware,0.96,,
+01:31:50,Household_5,DoorLock_2,Normal,benign,0.9,,
+01:31:51,Household_5,SmartTV_2,DoS,malware,0.99,,
