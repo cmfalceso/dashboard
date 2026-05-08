@@ -405,4 +405,18 @@ pending = len(st.session_state.get("threat_batch", []))
 if pending > 0:
     st.warning(f" {pending} threats queued — email sends in next batch window.")
 
+# ── TEMPORARY TEST BUTTON ─────────────────────────────────────
+if st.button("Send Test Email"):
+    from alert import email_alert
+    try:
+        email_alert(
+            subject="Test Email from IoT Dashboard",
+            body="This is a test. If you receive this, email sending works.",
+            to=st.secrets["OWNER_EMAIL"]
+        )
+        st.success("Test email sent!")
+    except Exception as e:
+        st.error(f"Email failed: {e}")
+# ─────────────────────────────────────────────────────────────
+
 check_csv_for_threats(df)
