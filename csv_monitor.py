@@ -1,79 +1,87 @@
-import smtplib
-from email.message import EmailMessage
-from datetime import datetime, timezone, timedelta
-from collections import Counter
 import streamlit as st
+from datetime import datetime, timedelta
+from collections import Counter
+from alert import classify_severity, send_summary_email
 
-def email_alert(subject, body, to):
-    msg = EmailMessage()
-    msg.set_content(body)
-    msg['Subject'] = subject
-    msg['To'] = to
-    msg['From'] = st.secrets["GMAIL_ADDRESS"]
+CONFIDENCE_THRESHOLD = 0.75
+WINDOW_MINUTES       = 1
+VOLUME_THRESHOLD     = 5
+DEVICE_THRESHOLD     = 5
 
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login(st.secrets["GMAIL_ADDRESS"], st.secrets["GMAIL_APP_PSWD"])
-    server.send_message(msg)
-    server.quit()
+def check_csv_for_threats(df):
 
-def classify_severity(confidence: float) -> str:
-    if confidence >= 0.95:
-        return "Critical"
-    elif confidence >= 0.85:
-        return "High"
-    elif confidence >= 0.75:
-        return "Medium"
-    else:
-        return "Low"
+    if "alerted_indices" not in st.session_state:
+        st.session_state.alerted_indices = set()
+    if "threat_batch"    not in st.session_state:
+        st.session_state.threat_batch = []
+    if "last_sms_time"   not in st.session_state:
+        st.session_state.last_sms_time = datetime.now()
 
-def send_summary_email(batch: list, urgent: bool = False, reason: str = ""):
-    if not batch:
+    for index, row in df.iterrows():
+        if index in st.session_state.alerted_indices:
+            continue
+
+        prediction = str(row["prediction"]).strip().lower()
+        try:
+            confidence = float(str(row["confidence"]).strip())
+        except (ValueError, TypeError):
+            continue
+
+        if prediction not in ("normal", "benign") and confidence >= CONFIDENCE_THRESHOLD:
+            try:
+                cpu = float(row["cpu_usage"])
+            except (ValueError, TypeError):
+                cpu = None
+            try:
+                ram = float(row["ram_usage"])
+            except (ValueError, TypeError):
+                ram = None
+
+            st.session_state.threat_batch.append({
+                "device"    : row["device"],
+                "household" : row["household"],
+                "confidence": confidence,
+                "severity"  : classify_severity(confidence),
+                "cpu"       : cpu,
+                "ram"       : ram,
+            })
+            st.session_state.alerted_indices.add(index)
+
+    batch = st.session_state.threat_batch
+
+    # ── DEBUG — remove these after fixing ────────────────────
+    st.write(f"DEBUG: batch size = {len(batch)}")
+    st.write(f"DEBUG: alerted_indices count = {len(st.session_state.alerted_indices)}")
+    st.write(f"DEBUG: last_sms_time = {st.session_state.last_sms_time}")
+    st.write(f"DEBUG: window elapsed = {(datetime.now() - st.session_state.last_sms_time) >= timedelta(minutes=WINDOW_MINUTES)}")
+    # ─────────────────────────────────────────────────────────
+
+    if len(batch) >= VOLUME_THRESHOLD:
+        st.write("DEBUG: Triggering urgent email — volume spike")
+        send_summary_email(batch, urgent=True, reason="High volume of threats detected")
+        st.session_state.threat_batch  = []
+        st.session_state.last_sms_time = datetime.now()
         return
 
-    total         = len(batch)
-    severities    = Counter(t["severity"] for t in batch)
     device_counts = Counter(t["device"] for t in batch)
-    top_devices   = device_counts.most_common(3)
-    top_household = Counter(t["household"] for t in batch).most_common(1)[0][0]
-    cpu_values = [t["cpu"] for t in batch if t["cpu"] is not None]
-    ram_values = [t["ram"] for t in batch if t["ram"] is not None]
-    avg_cpu    = sum(cpu_values) / len(cpu_values) if cpu_values else None
-    avg_ram    = sum(ram_values) / len(ram_values) if ram_values else None
-    resource_line = (
-        f"Avg CPU: {avg_cpu:.1f}%\nAvg RAM: {avg_ram:.1f}%\n──────────────────\n"
-        if avg_cpu is not None and avg_ram is not None
-        else ""
-    )
-    PH_TZ     = timezone(timedelta(hours=8))
-    timestamp = datetime.now(PH_TZ).strftime("%H:%M %b %d")
-    header        = "URGENT THREAT ALERT" if urgent else "THREAT SUMMARY"
-    device_lines  = "\n".join(f"  • {d} ({c}x)" for d, c in top_devices)
+    for device, count in device_counts.items():
+        if count >= DEVICE_THRESHOLD:
+            st.write(f"DEBUG: Triggering urgent email — {device} repeatedly flagged")
+            send_summary_email(batch, urgent=True, reason=f"{device} repeatedly flagged")
+            st.session_state.threat_batch  = []
+            st.session_state.last_sms_time = datetime.now()
+            return
 
-    body = f"""
-{header} — {timestamp}
-Reason: {reason}
-Household: {top_household}
-──────────────────
-Total: {total} threats
-Critical: {severities.get('Critical', 0)}
-High: {severities.get('High', 0)}
-Medium: {severities.get('Medium', 0)}
-Low: {severities.get('Low', 0)}
-──────────────────
-Top devices:
-{device_lines}
-──────────────────
-{resource_line} Check your dashboard immediately.
-    """
+    window_elapsed = (
+        datetime.now() - st.session_state.last_sms_time
+    ) >= timedelta(minutes=WINDOW_MINUTES)
 
-    try:
-        email_alert(
-            subject=f"⚠️ IoT Malware Detector — {header} ({total} threats)",
-            body=body,
-            to=st.secrets["OWNER_EMAIL"]
-        )
-        print(f"[EMAIL SENT] {reason} — {total} threats")
-    except Exception as e:
-        print(f"[EMAIL FAILED] {e}")
-        st.error(f"Email failed: {e}") 
+    if window_elapsed and len(batch) > 0:
+        st.write("DEBUG: Triggering scheduled email")
+        send_summary_email(batch, urgent=False, reason="Scheduled summary")
+        st.session_state.threat_batch  = []
+        st.session_state.last_sms_time = datetime.now()
+    elif window_elapsed and len(batch) == 0:
+        st.write("DEBUG: Window elapsed but batch is empty — no email sent")
+    elif not window_elapsed:
+        st.write("DEBUG: Window not elapsed yet — waiting")
