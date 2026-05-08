@@ -20,6 +20,7 @@ def check_csv_for_threats(df):
 
     # ── Only look at NEW rows since last run ─────────────────
     new_rows = df.iloc[st.session_state.last_processed_len:]
+    st.write(f"DEBUG: {len(new_rows)} new rows found")
 
     for index, row in new_rows.iterrows():
         prediction = str(row["prediction"]).strip().lower()
