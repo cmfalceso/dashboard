@@ -66,7 +66,7 @@ div[data-testid="stMetric"] {
 st.title("IoT Malware Detection Security Dashboard")
 
 # AUTO REFRESH
-#st_autorefresh(interval=3000)
+st_autorefresh(interval=10000)
 
 # LOAD DATA
 df = pd.read_csv(
