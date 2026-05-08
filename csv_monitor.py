@@ -49,13 +49,6 @@ def check_csv_for_threats(df):
 
     batch = st.session_state.threat_batch
 
-    # ── DEBUG — remove these after fixing ────────────────────
-    st.write(f"DEBUG: batch size = {len(batch)}")
-    st.write(f"DEBUG: alerted_indices count = {len(st.session_state.alerted_indices)}")
-    st.write(f"DEBUG: last_sms_time = {st.session_state.last_sms_time}")
-    st.write(f"DEBUG: window elapsed = {(datetime.now() - st.session_state.last_sms_time) >= timedelta(minutes=WINDOW_MINUTES)}")
-    # ─────────────────────────────────────────────────────────
-
     if len(batch) >= VOLUME_THRESHOLD:
         st.write("DEBUG: Triggering urgent email — volume spike")
         send_summary_email(batch, urgent=True, reason="High volume of threats detected")
