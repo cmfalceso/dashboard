@@ -61,14 +61,14 @@ def check_csv_for_threats(df):
     if not st.session_state.startup_done:
         st.session_state.startup_done = True
         if len(batch) > 0:
-            send_summary_email(batch, urgent=False, reason="System startup — current threat status")
+            #send_summary_email(batch, urgent=False, reason="System startup — current threat status")
             st.session_state.threat_batch  = []
             st.session_state.last_sms_time = datetime.now()
         return
 
     # ── After startup: normal escalation rules ────────────────
     if len(batch) >= VOLUME_THRESHOLD:
-        send_summary_email(batch, urgent=True, reason="High volume of threats detected")
+        #send_summary_email(batch, urgent=True, reason="High volume of threats detected")
         st.session_state.threat_batch  = []
         st.session_state.last_sms_time = datetime.now()
         return
@@ -76,7 +76,7 @@ def check_csv_for_threats(df):
     device_counts = Counter(t["device"] for t in batch)
     for device, count in device_counts.items():
         if count >= DEVICE_THRESHOLD:
-            send_summary_email(batch, urgent=True, reason=f"{device} repeatedly flagged")
+            #send_summary_email(batch, urgent=True, reason=f"{device} repeatedly flagged")
             st.session_state.threat_batch  = []
             st.session_state.last_sms_time = datetime.now()
             return
@@ -86,6 +86,6 @@ def check_csv_for_threats(df):
     ) >= timedelta(minutes=WINDOW_MINUTES)
 
     if window_elapsed and len(batch) > 0:
-        send_summary_email(batch, urgent=False, reason="Scheduled summary")
+        #send_summary_email(batch, urgent=False, reason="Scheduled summary")
         st.session_state.threat_batch  = []
         st.session_state.last_sms_time = datetime.now()
