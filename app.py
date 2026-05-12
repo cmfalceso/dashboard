@@ -66,7 +66,7 @@ div[data-testid="stMetric"] {
 st.title("IoT Malware Detection Security Dashboard")
 
 # AUTO REFRESH
-#st_autorefresh(interval=10000)
+st_autorefresh(interval=20000)
 
 # LOAD DATA
 df = pd.read_csv(
@@ -135,9 +135,6 @@ col3.metric("Active Devices", df["device"].nunique())
 col4.metric("Avg Confidence", round(df["confidence"].mean(), 2))
 
 st.divider()
-
-# NETWORK OVERVIEW (MAIN SECTION)
-#t.subheader("Network Overview")
 
 left_col, right_col = st.columns([2, 3])
 
@@ -215,7 +212,7 @@ st.subheader("Detection Timeline")
 MAX_POINTS = 50  # how many time steps to show (scrolling window)
 
 # Initialize session state buffers per device
-devices_to_monitor = ["RasPi", "VM1"]  # 🔧 adjust to match your device names in the CSV
+devices_to_monitor = ["RasPi", "VM1"]  # adjust to match device names in the CSV
 
 # Initialize deques AND a row counter
 for device in devices_to_monitor:
