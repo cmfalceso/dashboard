@@ -212,7 +212,7 @@ st.subheader("Detection Timeline")
 MAX_POINTS = 50  # how many time steps to show (scrolling window)
 
 # Initialize session state buffers per device
-devices_to_monitor = ["RasPi", "VM1", "VM2", "VM3", "VM4", "VM5"]  # adjust to match device names in the CSV
+devices_to_monitor = ["RasPi", "VM1", "VM2", "VM3", "VM4"]  # adjust to VM5
 
 # Initialize deques AND a row counter
 for device in devices_to_monitor:
