@@ -87,6 +87,6 @@ def check_csv_for_threats(df):
     ) >= timedelta(minutes=WINDOW_MINUTES)
 
     if window_elapsed and len(batch) > 0:
-        #send_summary_email(batch, urgent=False, reason="Scheduled summary")
+        send_summary_email(batch, urgent=False, reason="Scheduled summary")
         st.session_state.threat_batch  = []
         st.session_state.last_sms_time = datetime.now()
