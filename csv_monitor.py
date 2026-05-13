@@ -5,8 +5,8 @@ from collections import Counter
 from alert import classify_severity, send_summary_email
 
 CONFIDENCE_THRESHOLD = 0.75
-WINDOW_MINUTES       = 1
-VOLUME_THRESHOLD     = 5
+WINDOW_MINUTES       = 10
+VOLUME_THRESHOLD     = 20
 DEVICE_THRESHOLD     = 5
 
 def check_csv_for_threats(df):
