@@ -314,6 +314,8 @@ for pair in device_pairs:
                         <div style="font-size:18px; font-weight:bold; color:#e35335">{malware_pct:.1f}%</div>
                     </div>
                     """, unsafe_allow_html=True)
+
+st.markdown("<hr style='border:1px solid #2a2a2a; margin:4px 0 12px 0'>", unsafe_allow_html=True)
                     
 # ------------------------------------------------
 # TIMELINE
