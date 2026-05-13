@@ -274,21 +274,20 @@ for pair in device_pairs:
     for col, device in zip(cols, pair):
         with col:
             with st.expander(f"📟 {device}", expanded=(device == "RasPi")):
-                col_cpu, col_ram, col_stats = st.columns([2, 2, 1])
+                col_chart, col_stats = st.columns([3, 1])
 
                 cpu_data = st.session_state[f"{device}_cpu"]
                 ram_data = st.session_state[f"{device}_ram"]
                 current_cpu = list(cpu_data)[-1]
                 current_ram = list(ram_data)[-1]
 
-                with col_cpu:
+                with col_chart:
+                    # CPU and RAM stacked vertically
                     st.plotly_chart(
                         make_taskmanager_chart(cpu_data, "CPU", "rgb(0, 200, 150)"),
                         width='stretch',
                         key=f"{device}_cpu_chart"
                     )
-
-                with col_ram:
                     st.plotly_chart(
                         make_taskmanager_chart(ram_data, "RAM", "rgb(100, 149, 237)"),
                         width='stretch',
@@ -315,10 +314,7 @@ for pair in device_pairs:
                         <div style="font-size:18px; font-weight:bold; color:#e35335">{malware_pct:.1f}%</div>
                     </div>
                     """, unsafe_allow_html=True)
-
-    st.markdown("<hr style='border:1px solid #2a2a2a; margin:4px 0 12px 0'>", unsafe_allow_html=True)
-    
-
+                    
 # ------------------------------------------------
 # TIMELINE
 # ------------------------------------------------
