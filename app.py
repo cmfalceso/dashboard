@@ -267,50 +267,54 @@ def make_taskmanager_chart(data, label, color):
     return fig
 
 # Render one row per device
-for device in devices_to_monitor:
-    is_expanded = (device == "RasPi")
-    with st.expander(f"📟 {device}", expanded=is_expanded):
-        col_cpu, col_ram, col_stats = st.columns([2, 2, 1])
+device_pairs = [devices_to_monitor[i:i+2] for i in range(0, len(devices_to_monitor), 2)]
 
-        cpu_data = st.session_state[f"{device}_cpu"]
-        ram_data = st.session_state[f"{device}_ram"]
-        current_cpu = list(cpu_data)[-1]
-        current_ram = list(ram_data)[-1]
+for pair in device_pairs:
+    cols = st.columns(2)
+    for col, device in zip(cols, pair):
+        with col:
+            with st.expander(f"📟 {device}", expanded=(device == "RasPi")):
+                col_cpu, col_ram, col_stats = st.columns([2, 2, 1])
 
-        with col_cpu:
-            st.plotly_chart(
-                make_taskmanager_chart(cpu_data, "CPU", "rgb(0, 200, 150)"),
-                width='stretch',
-                key=f"{device}_cpu_chart"
-            )
+                cpu_data = st.session_state[f"{device}_cpu"]
+                ram_data = st.session_state[f"{device}_ram"]
+                current_cpu = list(cpu_data)[-1]
+                current_ram = list(ram_data)[-1]
 
-        with col_ram:
-            st.plotly_chart(
-                make_taskmanager_chart(ram_data, "RAM", "rgb(100, 149, 237)"),
-                width='stretch',
-                key=f"{device}_ram_chart"
-            )
+                with col_cpu:
+                    st.plotly_chart(
+                        make_taskmanager_chart(cpu_data, "CPU", "rgb(0, 200, 150)"),
+                        width='stretch',
+                        key=f"{device}_cpu_chart"
+                    )
 
-        with col_stats:
-            device_df = df[df["device"] == device]
-            malware_pct = (
-                (device_df["prediction"] == "malware").sum() / len(device_df) * 100
-                if not device_df.empty else 0
-            )
-            status = "🔴 Infected" if malware_pct > 0 else "🟢 Safe"
+                with col_ram:
+                    st.plotly_chart(
+                        make_taskmanager_chart(ram_data, "RAM", "rgb(100, 149, 237)"),
+                        width='stretch',
+                        key=f"{device}_ram_chart"
+                    )
 
-            st.markdown(f"""
-            <div class="metric-box" style="margin-top:10px">
-                <div style="font-size:13px; color:#aaa">CPU</div>
-                <div style="font-size:22px; font-weight:bold; color:#00c896">{current_cpu:.1f}%</div>
-                <div style="font-size:13px; color:#aaa; margin-top:6px">RAM</div>
-                <div style="font-size:22px; font-weight:bold; color:#6495ed">{current_ram:.1f}%</div>
-                <div style="font-size:13px; color:#aaa; margin-top:6px">Status</div>
-                <div style="font-size:15px">{status}</div>
-                <div style="font-size:13px; color:#aaa; margin-top:6px">Malware Rate</div>
-                <div style="font-size:18px; font-weight:bold; color:#e35335">{malware_pct:.1f}%</div>
-            </div>
-            """, unsafe_allow_html=True)
+                with col_stats:
+                    device_df = df[df["device"] == device]
+                    malware_pct = (
+                        (device_df["prediction"] == "malware").sum() / len(device_df) * 100
+                        if not device_df.empty else 0
+                    )
+                    status = "🔴 Infected" if malware_pct > 0 else "🟢 Safe"
+
+                    st.markdown(f"""
+                    <div class="metric-box" style="margin-top:10px">
+                        <div style="font-size:13px; color:#aaa">CPU</div>
+                        <div style="font-size:22px; font-weight:bold; color:#00c896">{current_cpu:.1f}%</div>
+                        <div style="font-size:13px; color:#aaa; margin-top:6px">RAM</div>
+                        <div style="font-size:22px; font-weight:bold; color:#6495ed">{current_ram:.1f}%</div>
+                        <div style="font-size:13px; color:#aaa; margin-top:6px">Status</div>
+                        <div style="font-size:15px">{status}</div>
+                        <div style="font-size:13px; color:#aaa; margin-top:6px">Malware Rate</div>
+                        <div style="font-size:18px; font-weight:bold; color:#e35335">{malware_pct:.1f}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
     st.markdown("<hr style='border:1px solid #2a2a2a; margin:4px 0 12px 0'>", unsafe_allow_html=True)
     
