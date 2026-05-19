@@ -7,14 +7,8 @@ from collections import deque
 from streamlit_autorefresh import st_autorefresh
 from csv_monitor import check_csv_for_threats
 
-# ------------------------------------------------
-# PAGE CONFIG
-# ------------------------------------------------
 st.set_page_config(page_title="IoT Malware Detection", layout="wide")
 
-# ------------------------------------------------
-# CUSTOM CSS
-# ------------------------------------------------
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@300;400;500&display=swap');
@@ -72,7 +66,7 @@ st_autorefresh(interval=20000)
 df = pd.read_csv(
     "detections.csv",
     names=["timestamp", "household", "device", "attack_type", "prediction", "confidence", "cpu_usage", "ram_usage"],
-    on_bad_lines='skip'   # ← skips any malformed old rows
+    on_bad_lines='skip'   # skips any malformed old rows
 )
 
 df = df[df["confidence"] != "confidence"]  # drop the accidental header row
@@ -189,7 +183,7 @@ with right_col:
 
         fig.update_layout(
             height=200,
-            margin=dict(t=40, b=10, l=20, r=20)  # ← kills the extra whitespace
+            margin=dict(t=40, b=10, l=20, r=20)  # kills the extra whitespace
         )
         return fig
 
@@ -212,7 +206,7 @@ st.subheader("Detection Timeline")
 MAX_POINTS = 50  # how many time steps to show (scrolling window)
 
 # Initialize session state buffers per device
-devices_to_monitor = ["RasPi", "VM1", "VM2", "VM3", "VM4"]  # adjust to VM5
+devices_to_monitor = ["RasPi", "VM1", "VM2", "VM3", "VM4"] # adjust to VM5
 
 # Initialize deques AND a row counter
 for device in devices_to_monitor:
@@ -273,7 +267,7 @@ for pair in device_pairs:
     cols = st.columns(2)
     for col, device in zip(cols, pair):
         with col:
-            with st.expander(f"📟 {device}", expanded=(device == "RasPi")):
+            with st.expander(f"📟 {device}", expanded=False):
                 col_chart, col_stats = st.columns([3, 1])
 
                 cpu_data = st.session_state[f"{device}_cpu"]
@@ -317,18 +311,6 @@ for pair in device_pairs:
 
 st.markdown("<hr style='border:1px solid #2a2a2a; margin:4px 0 12px 0'>", unsafe_allow_html=True)
                     
-# ------------------------------------------------
-# TIMELINE
-# ------------------------------------------------
-# st.subheader("Detection Timeline")
-# timeline = df.groupby("timestamp").size()
-# st.line_chart(timeline)
-
-# st.divider()
-
-# ------------------------------------------------
-# DEVICE STATUS + LIVE ALERTS (combined row)
-# ------------------------------------------------
 col_devices, col_alerts = st.columns([2, 2])
 
 with col_devices:
