@@ -267,7 +267,7 @@ for pair in device_pairs:
     cols = st.columns(2)
     for col, device in zip(cols, pair):
         with col:
-            with st.expander(f"📟 {device}", expanded=False):
+            with st.expander(f"📟 {device}", expanded=True):
                 col_chart, col_stats = st.columns([3, 1])
 
                 cpu_data = st.session_state[f"{device}_cpu"]
