@@ -72,8 +72,3 @@ with open("detections.csv", "w") as f:
 while True:
     generate_batch()
     time.sleep(1)
-
-# ── Run continuously ──────────────────────────────
-while True:
-    generate_batch()
-    time.sleep(1)
