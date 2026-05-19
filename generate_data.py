@@ -11,7 +11,7 @@ devices = {
     "Household_5": ["DoorLock_2", "SmartTV_2", "Router_2"]
 }
 
-monitor_devices = ["RasPi", "VM1", "VM2", "VM3", "VM4"]
+monitor_devices = ["RasPi", "VM1", "VM2", "VM3", "VM4", "VM5"]
 
 infection_probability = {
     "Household_1": 0.10,
