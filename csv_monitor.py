@@ -21,7 +21,7 @@ def check_csv_for_threats(df):
     if "startup_done"        not in st.session_state:
         st.session_state.startup_done = False
 
-    # ── Process only new rows ─────────────────────────────────
+    # Process only new rows
     new_rows = df.iloc[st.session_state.last_processed_len:]
 
     for index, row in new_rows.iterrows():
@@ -53,12 +53,12 @@ def check_csv_for_threats(df):
                 "ram"       : ram,
             })
 
-    # ── Update pointer ────────────────────────────────────────
+    # Update pointer
     st.session_state.last_processed_len = len(df)
 
     batch = st.session_state.threat_batch
 
-    # ── On startup: send ONE summary of existing threats ──────
+    # On startup: send ONE summary of existing threats
     if not st.session_state.startup_done:
         st.session_state.startup_done = True
         if len(batch) > 0:
@@ -67,7 +67,7 @@ def check_csv_for_threats(df):
             st.session_state.last_sms_time = datetime.now()
         return
 
-    # ── After startup: normal escalation rules ────────────────
+    # After startup: normal escalation rules
     if len(batch) >= VOLUME_THRESHOLD:
         send_summary_email(batch, urgent=True, reason="High volume of threats detected")
         st.session_state.threat_batch  = []
